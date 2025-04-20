@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "pZrgmcG78Ia0rgh7k43tKt1GYGXPBz2ABSEzNYC/x50=",
+  "Source": "SensorDataApi",
+  "BasePath": "_content/SensorDataApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

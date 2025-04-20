@@ -1,0 +1,89 @@
+﻿@page "/sensor"
+@inject HttpClient Http
+@inject NavigationManager uriHelper;
+
+<PageTitle>Sensor Data</PageTitle>
+
+<h1>Sensor Measurements</h1>
+
+<p>The sensor data generated randomly at the backend server are displayed here in the tabular form including the timestamp.</p>
+
+@if (sensordatalist == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Temp. (C)</th>
+                <th>Pressure (Pa)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sensor in sensordatalist)
+            {
+                <tr>
+                    <td>@sensor.Timestamp</td>
+                    <td>@sensor.Temperature</td>
+                    <td>@sensor.Pressure</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<SensorData> sensordatalist = new List<SensorData>();
+    private SensorData[]? sensordata;
+ 
+    protected override async Task OnInitializedAsync()
+    {
+       
+        try
+        {
+
+            sensordata = await Http.GetFromJsonAsync<SensorData[]>("sensor");
+            
+            if (sensordata != null)
+            {
+                foreach (var newSensor in sensordata)
+                {
+                    if (!sensordatalist.Any(existing =>
+                    Math.Abs((existing.Timestamp - newSensor.Timestamp).TotalMilliseconds) < 1000)) // 1-second tolerance
+                    {
+                        sensordatalist.Add(newSensor);
+                    }
+                }
+            }
+
+            Console.WriteLine(sensordatalist);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        SetTimer();
+    }
+
+    private void SetTimer()
+    {
+        var timer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(OnInitializedAsync); // Fetch new data every 10 seconds
+            StateHasChanged(); // re-render of the page
+        }, null, 10000, 10000); // every 10 seconds
+    }
+
+
+    public class SensorData
+    {
+        public DateTime Timestamp { get; set; }
+        public double Temperature { get; set; }
+        public double Pressure { get; set; }
+    }
+
+}
